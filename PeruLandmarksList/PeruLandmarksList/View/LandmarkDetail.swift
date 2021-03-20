@@ -39,9 +39,6 @@ struct LandmarkDetail: View {
                     
                     Divider()
                     
-                    Text("Acerca de: \(landmark.name)")
-                        .font(.title3)
-                    
                     Text(landmark.description)
                         .font(.body)
                     

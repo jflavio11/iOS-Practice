@@ -9,8 +9,8 @@
         "isFavorite": true,
         "park": "Reserva del Manu",
         "coordinates": {
-            "longitude": -12.140000,
-            "latitude": -71.660000
+            "longitude": -71.660000,
+            "latitude": -12.140000
         },
         "description": "El gallito de las rocas peruano, (en quechua: tunki) o simplemente gallito de las rocas (Rupicola peruvianus), es una especie de ave paseriforme de la familia Cotingidae, una de las dos perteneciente al género Rupicola. Es nativo de la región andino - amazónica del noroeste y oeste de América del Sur. No se conocen subespecies. Su pariente más cercano es el gallito de las rocas guayanés (R. rupicola) y es notable por la increíble belleza de su plumaje. En Ecuador se lo puede encontrar en las estribaciones occidentales de los Andes.",
         "imageName": "cockOfTheRock"
@@ -25,8 +25,8 @@
         "isFavorite": false,
         "park": "Santuario histórico de Macchu Picchu",
         "coordinates": {
-            "longitude": -13.163056,
-            "latitude":  -72.545556
+            "longitude": -72.545556,
+            "latitude":  -13.163056
         },
         "description": "Machu Picchu (pronunciado /mɑtʃu ˈpiktʃu/ en quechua, «Monte viejo») es el nombre contemporáneo que se da a una llaqta —antiguo poblado incaico andino— construida antes del siglo xv, ubicada en la Cordillera Oriental del sur de Perú, en la cadena montañosa de Los Andes a 2430 metros sobre el nivel del mar. Está ubicada en la región Cusco, provincia de Urubamba, distrito de Machupicchu, sobre el Valle Sagrado de los Incas, a 80 kilómetros al noroeste de la ciudad de Cusco, ciudad del Perú y por donde fluye el río Urubamba, río que atraviesa la cordillera y origina un cañón con clima de montaña tropical. Según muchos estudiosos su nombre original habría sido Llaqtapata.",
         "imageName": "macchupicchu"
@@ -41,8 +41,8 @@
         "isFavorite": true,
         "park": "Valle del Colca",
         "coordinates": {
-            "longitude": -15.607005568018426,
-            "latitude": -72.0896032483929
+            "longitude": -72.0896032483929,
+            "latitude": -15.607005568018426,
         },
         "description": "El valle del Colca es uno de los mayores destinos turísticos del Perú. Está ubicado en la provincia de Caylloma. Colca proviene de las palabras Collaguas y Cabanas, dos etnias que habitaban a lo largo del río Colca. Este cañón tiene una profundidad de 4160 m, y es el cuarto cañón más profundo del planeta. La provincia de Caylloma, designada genéricamente como “Colca”, forma parte del departamento de Arequipa, en el Perú, y está ubicada en el extremo noreste de esta región. La provincia tiene como escenario principal el Cañón del Colca y es en su entorno que se han asentado las poblaciones que la identifican.",
         "imageName": "valledelcolca"
