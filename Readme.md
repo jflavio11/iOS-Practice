@@ -1,374 +1,290 @@
-# Building Lists and Navigation
+# Handling user input
 
-[https://developer.apple.com/tutorials/swiftui/building-lists-and-navigation](https://developer.apple.com/tutorials/swiftui/building-lists-and-navigation)
+[https://developer.apple.com/tutorials/swiftui/handling-user-input](https://developer.apple.com/tutorials/swiftui/handling-user-input)
 
-Create a Landmark model.
+In the Landmarks app, a user can flag their favorite places, and filter the list to show just their favorites. To create this feature, you’ll start by adding a switch to the list so users can focus on just their favorites, and then you’ll add a star-shaped button that a user taps to flag a landmark as a favorite.
+
+## Mark the User’s Favorite Landmarks
+
+Add a property to the Landmark structure to read the initial state of a landmark as a favorite, and then add a star to each LandmarkRow that shows a favorite landmark.
+
+![readme-images/Screen_Shot_2021-03-21_at_9.08.05_AM.png](readme-images/Screen_Shot_2021-03-21_at_9.08.05_AM.png)
+
+Add an `isFavorite` property to the `Landmark` structure.
+
+The `landmarkData.json` file has a key with this name for each landmark. Because `Landmark` conforms to `Codable`, you can read the value associated with the key by creating a new property with the same name as the key.
+
+In `LandmarkRow.swift` , after the spacer, add a star image inside an `if`statement to test whether the current landmark is a favorite.
+
+In SwiftUI blocks, you use `if` statements to conditionally include views.
+
+Because system images are vector based, you can change their color with the `foregroundColor(_:)` modifier.
+
+The star is present whenever a landmark’s `isFavorite` property is `true`. You’ll see how to modify that property later in this tutorial.
 
 ```swift
-import Foundation
-
-struct Landmark: Hashable, Codable {
-    var id: Int
-    var name: String
-    var park: String
-    var state: String
-    var description: String
+if landmark.isFavorite {
+        Image(systemName: "star.fill")
+            .foregroundColor(.yellow)
 }
 ```
 
-![readme-images/Screen_Shot_2021-03-20_at_11.31.12_AM.png](readme-images/Screen_Shot_2021-03-20_at_11.31.12_AM.png)
+"star.fill" is an Apple SF Symbol. You can find more here: https://developer.apple.com/design/human-interface-guidelines/sf-symbols/overview/
+or by downloading the SF Symbols app: https://developer.apple.com/design/downloads/SF-Symbols.dmg
 
-Adding Codable conformance makes it easier to load data into the structure from the data file, which you’ll do later in this section.
+## Filter the list view
 
-Add an `imageName` property to read the name of the image from the data, and a computed `image` property that loads an image from the asset catalog.
+You can customize the list view so that it shows all of the landmarks, or just the user’s favorites. To do this, you’ll need to add a bit of *state* to the `LandmarkList` type.
 
-You make the property private because users of the `Landmarks` structure care only about the image itself.
+*State* is a value, or a set of values, that can change over time, and that affects a view’s behavior, content, or layout. You use a property with the `@State` attribute to add state to a view.
+
+Similar to `mutableStateOf` in Android Jetpack Compose.
+
+![readme-images/Screen_Shot_2021-03-21_at_9.23.11_AM.png](readme-images/Screen_Shot_2021-03-21_at_9.23.11_AM.png)
+
+In `LandmarksList.swift`, add a `@State` property called `showFavoritesOnly` with its initial value set to `false`.
+
+Because you use state properties to hold information that is specific to a view and its subviews, you always create state as `private`. Then refresh the canvas.
 
 ```swift
-import SwiftUI
-
-struct Landmark {
-
-	...
-
-	private var imageName: String
-	var image: Image {
-		Image(imageName)
-	}
-
-}
+@State private var showFavoritesOnly = false
 ```
 
-Add a `coordinates` property to the structure using a nested `Coordinates` type that reflects the storage in the JSON data structure.
+When you make changes to your view’s structure, like adding or modifying a property, you need to manually refresh the canvas.
 
-You mark this property as private because you’ll use it only to create a public computed property in the next step.
-
-Compute a locationCoordinate property that’s useful for interacting with the MapKit framework.
+Then add a variable to filters the list. This variable is going to be used for showing the UI list.
 
 ```swift
-struct Landmark {
-
-	...
-
-		private var coordinates: Coordinates
-    var locationCordinates: CLLocationCoordinate2D {
-        CLLocationCoordinate2D(latitude: coordinates.latitude, longitude: coordinates.longitude)
-    }
-    struct Coordinates: Hashable, Codable {
-        var latitude: Double
-        var longitude: Double
-    }
-
-}
-```
-
-### For Loading data from JSON file...
-
-Create a `load(_:)` method that fetches JSON data with a given name from the app’s main bundle.
-
-The load method relies on the return type’s conformance to the `Codable` protocol.
-
-```swift
-import Foundation
-
-func load<T: Decodable>(_ filename: String) -> T {
-    let data: Data
-
-    guard let file = Bundle.main.url(forResource: filename, withExtension: nil)
-    else {
-        fatalError("Couldn't find \(filename) in main bundle.")
-    }
-
-    do {
-        data = try Data(contentsOf: file)
-    } catch {
-        fatalError("Couldn't load \(filename) from main bundle:\n\(error)")
-    }
-
-    do {
-        let decoder = JSONDecoder()
-        return try decoder.decode(T.self, from: data)
-    } catch {
-        fatalError("Couldn't parse \(filename) as \(T.self):\n\(error)")
-    }
-}
-```
-
-***guard*** executes something if a condition **is false**.
-
-Source: https://swiftbycoding.dev/swift/guard/
-
-```swift
-guard <boolean condition> else {
-
-    <code body>
-		// break
-		// return
-		// continue
-		// throw
-
-}
-```
-
-## Create the Row View
-
-![readme-images/Screen_Shot_2021-03-20_at_11.55.25_AM.png](readme-images/Screen_Shot_2021-03-20_at_11.55.25_AM.png)
-
-Add `landmark` as a stored property of `LandmarkRow`.
-
-When you add the `landmark` property, the preview stops working, because the `LandmarkRow` type needs a landmark instance during initialization.
-
-```swift
-struct LandmarkRow: View {
-
-    var landmark: Landmark
-
-    var body: some View {
-        Text("Hello, World!")
-    }
-
-}
-```
-
-In the `previews` static property of `LandmarkRow_Previews`, add the landmark parameter to the `LandmarkRow` initializer, specifying the first element of the `landmarks` array.
-
-The preview still displays the text, “Hello, World!”.
-
-```swift
-struct LandmarkRow_Previews: PreviewProvider {
-    static var previews: some View {
-        LandmarkRow(landmark: landmarks[0])
-    }
-}
-```
-
-## Customize the Row Preview
-
-Xcode’s canvas automatically recognizes and displays any type in the current editor that conforms to the `PreviewProvider` protocol. A preview provider returns one or more views, with options to configure the size and device.
-
-You can customize the returned content from a preview provider to render exactly the previews that are most helpful to you.
-
-![readme-images/Screen_Shot_2021-03-20_at_12.01.33_PM.png](readme-images/Screen_Shot_2021-03-20_at_12.01.33_PM.png)
-
-You can use a `Group` to return multiple previews from a preview provider.
-
-Wrap the returned row in a `Group`, and add the first row back again.
-
-`Group` is a container for grouping view content. Xcode renders the group’s child views as separate previews in the canvas.
-
-```swift
-struct LandmarkRow_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            LandmarkRow(landmark: landmarks[0])
-                .previewLayout(.fixed(width: 300, height: 70))
-            LandmarkRow(landmark: landmarks[1])
-                .previewLayout(.fixed(width: 300, height: 70))
+var filteredLandmarks: [Landmark] {
+        landmarks.filter { landmark in
+                (!showFavoritesOnly || landmark.isFavorite)
         }
-    }
 }
 ```
 
-### Landmarks List
+## Add a Control to Toggle the State
 
-Create a `LandmarksList.swift` SwiftUI file.
+To give the user control over the list’s filter, you need to add a control that can alter the value of `showFavoritesOnly`. You do this by passing a binding to a toggle control.
 
-Replace the default `Text` view with a `List`, and provide `LandmarkRow` instances with the first two landmarks as the list’s children.
+A *binding* acts as a reference to a mutable state. When a user taps the toggle from off to on, and off again, the control uses the binding to update the view’s state accordingly.
 
-The preview shows the two landmarks rendered in a list style that’s appropriate for iOS.
+![readme-images/Screen_Shot_2021-03-21_at_9.33.57_AM.png](readme-images/Screen_Shot_2021-03-21_at_9.33.57_AM.png)
 
-```swift
-struct LandmarkList: View {
-    var body: some View {
-        List {
-            LandmarkRow(landmark: landmarks[0])
-            LandmarkRow(landmark: landmarks[1])
-        }
-    }
-}
-```
+Create a nested `ForEach` group to transform the landmarks into rows.
 
-But, we should...
-
-## Make the List Dynamic
-
-Instead of specifying a list’s elements individually, you can generate rows directly from a collection.
-
-You can create a list that displays the elements of collection by passing your collection of data and a closure that provides a view for each element in the collection. The list transforms each element in the collection into a child view by using the supplied closure.
-
-![readme-images/Screen_Shot_2021-03-20_at_12.14.14_PM.png](readme-images/Screen_Shot_2021-03-20_at_12.14.14_PM.png)
-
-**Lists work with identifiable data**. You can make your data identifiable in one of two ways: 
-- by passing along with your data a key path to a property that uniquely identifies each element,
-- by making your data type conform to the Identifiable protocol.
-
-Complete the dynamically-generated list by returning a `LandmarkRow` from the closure.
-
-This creates one `LandmarkRow` for each element in the `landmarks` array.
-
-```swift
-struct LandmarkList: View {
-    var body: some View {
-        List(landmarks, id: \.id) { landmark in
-            LandmarkRow(landmark: landmark)
-        }
-    }
-}
-```
-
-Next, you’ll simplify the `List` code by adding `Identifiable` conformance to the `Landmark` type.
-
-Switch to `Landmark.swift` and declare conformance to the `Identifiable` protocol.
-
-The `Landmark` data already has the `id`property required by `Identifiable`protocol; you only need to add a property to decode it when reading the data.
-
-```swift
-struct Landmark: Hashable, Codable, Identifiable {
-    var id: Int
-		...
-}
-```
-
-## Set Up Navigation Between List and Detail
-
-The list renders properly, but you can’t tap an individual landmark to see that landmark’s detail page yet.
-
-You add navigation capabilities to a list by embedding it in a `NavigationView`, and then nesting each row in a `NavigationLink` to set up a transtition to a destination view.
-
-![readme-images/Screen_Shot_2021-03-20_at_12.19.00_PM.png](readme-images/Screen_Shot_2021-03-20_at_12.19.00_PM.png)
-
-Embed the dynamically generated list of landmarks in a NavigationView.
-
-Call the `navigationTitle(_:)` modifier method to set the title of the navigation bar when displaying the list.
-
-Inside the list’s closure, wrap the returned row in a `NavigationLink`, specifying the `LandmarkDetail` view as the destination.
+To combine static and dynamic views in a list, or to combine two or more different groups of dynamic views, use the `ForEach` type instead of passing your collection of data to `List`.
 
 ```swift
 var body: some View {
         NavigationView {
-
-            List(landmarks) { landmark in
-                NavigationLink(destination: LandmarkDetail()) {
-                    LandmarkRow(landmark: landmark)
+            List {
+                ForEach(filteredLandmarks) { landmark in
+                    NavigationLink(destination: LandmarkDetail(landmark: landmark)) {
+                        LandmarkRow(landmark: landmark)
+                    }
                 }
             }
             .navigationTitle("Landmarks")
-
         }
-}
-```
-
-## Pass Data into Child Views
-
-The `LandmarkDetail` view still uses hard-coded details to show its landmark. Just like `LandmarkRow`, the `LandmarkDetail` type and the views it comprises need to use a `landmark` property as the source for their data.
-
-Starting with the child views, you’ll convert `CircleImage`, `MapView`, and then `LandmarkDetail` to display data that’s passed in, rather than hard-coding each row.
-
-![readme-images/Screen_Shot_2021-03-20_at_12.24.30_PM.png](readme-images/Screen_Shot_2021-03-20_at_12.24.30_PM.png)
-
-In `CircleImage.swift`, add a stored `image`property to `CircleImage`.
-
-This is a common pattern when building views using SwiftUI. Your custom views will often wrap and encapsulate a series of modifiers for a particular view.
-
-```swift
-struct CircleImage: View {
-    var image: Image
-
-    var body: some View {
-        image
-            .clipShape(Circle())
-		...
-}
-```
-
-In `MapView.swift` add a method that updates the region based on a coordinate value.
-
-```swift
-private func setRegion(_ coordinate: CLLocationCoordinate2D) {
-        region = MKCoordinateRegion(
-            center: coordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
-        )
-}
-```
-
-And add an `onAppear` view modifier to the map that triggers a calculation of the region based on the current coordinate.
-
-```swift
-struct MapView: View {
-    var coordinate: CLLocationCoordinate2D
-    @State private var region = MKCoordinateRegion()
-
-    var body: some View {
-        Map(coordinateRegion: $region)
-            .onAppear {
-                setRegion(coordinate)
-            }
     }
-
-    private func setRegion(_ coordinate: CLLocationCoordinate2D) {
-        region = MKCoordinateRegion(
-            center: coordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
-        )
-    }
-}
 ```
 
-For Landmark Detail, change the container from a `VStack` to a `ScrollView` so the user can scroll through the descriptive content, and delete the Spacer, which you no longer need.
+`ForEach` is a structure that computes views on demand from an underlying collection of identified data.
 
-Finally, call the `navigationTitle(_:)`modifier to give the navigation bar a title when showing the detail view, and the `navigationBarTitleDisplayMode(_:)` modifier to make the title appear inline.
+A `List` has a special appearance, depending on the platform. For example, on iOS a list will appear as a table view and insert separator lines between its vertically stacked views.
 
-The navigation changes only have an effect when the view is part of a navigation stack.
+You can use `ForEach` views inside `List` views to have both dynamic and static content – a very powerful feature of SwiftUI.
+
+More info: https://stackoverflow.com/questions/56535326/what-is-the-difference-between-list-and-foreach-in-swiftui
+
+Add a `Toggle` view as the first child of the `List` view, passing a binding to `showFavoritesOnly`.
+
+You use the `$` prefix to access a binding to a state variable, or one of its properties.
 
 ```swift
-ScrollView {
-            MapView(coordinate: landmark.locationCoordinate)
-                .ignoresSafeArea(edges: .top)
-                .frame(height: 300)
+List {
 
-            CircleImage(image: landmark.image)
-                .offset(y: -130)
-                .padding(.bottom, -130)
+        Toggle(isOn: $showFavoritesOnly) {
+                Text("Favorites only")
+        }
 
-            VStack(alignment: .leading) {
-                Text(landmark.name)
-                    .font(.title)
-                    .foregroundColor(.primary)
-
-                HStack {
-                    Text(landmark.park)
-                    Spacer()
-                    Text(landmark.state)
+        ForEach(filteredLandmarks) { landmark in
+                NavigationLink(destination: LandmarkDetail(landmark: landmark)) {
+                        LandmarkRow(landmark: landmark)
                 }
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+        }
 
-                Divider()
-
-                Text("About \(landmark.name)")
-                    .font(.title2)
-                Text(landmark.description)
-            }
-            .padding()
 }
-.navigationTitle(landmark.name)
-.navigationBarTitleDisplayMode(.inline)
 ```
 
-## Preview in diferent devices
+## Use an Observable Object for Storage
 
-Within the list preview, embed the `LandmarkList` in a `ForEach` instance, using an array of device names as the data.
+To prepare for the user to control which particular landmarks are favorites, you’ll first store the landmark data in an *observable object.*
 
-`ForEach` operates on collections the same way as the list, which means you can use it anywhere you can use a child view, such as in stacks, lists, groups, and more. When the elements of your data are simple value types — like the strings you’re using here — you can use `\.self` as key path to the identifier.
+![readme-images/Screen_Shot_2021-03-21_at_9.46.16_AM.png](readme-images/Screen_Shot_2021-03-21_at_9.46.16_AM.png)
+
+An observable object is a custom object for your data that can be bound to a view from storage in SwiftUI’s environment. SwiftUI watches for any changes to observable objects that could affect a view, and displays the correct version of the view after a change.
+
+Declare a new model type that conforms to the `ObservableObject` protocol from the Combine framework.
+
+SwiftUI subscribes to your observable object, and updates any views that need refreshing when the data changes.
+
+An observable object needs to **publish** any changes to its data, so that its **subscribers** can pick up the change.
 
 ```swift
+import Combine
+
+final class ModelData: ObservableObject {
+        @Published var landmarks: [Landmark] = load("landmarkData.json")
+}
+```
+
+## Adopt the Model Object in Your Views
+
+![readme-images/Screen_Shot_2021-03-21_at_9.48.53_AM.png](readme-images/Screen_Shot_2021-03-21_at_9.48.53_AM.png)
+
+In `LandmarkList.swift`, add an `@EnvironmentObject` property declaration to the view, and an `environmentObject(_:)` modifier to the preview.
+
+The `modelData` property gets its value automatically, as long as the `environmentObject(_:)` modifier has been applied to a parent.
+
+```swift
+struct LandmarkList: View {
+    
+        @EnvironmentObject var modelData: ModelData
+
+        ...
+}
+
 struct LandmarkList_Previews: PreviewProvider {
     static var previews: some View {
-        ForEach(["iPhone SE (2nd generation)", "iPhone XS Max"], id: \.self) { deviceName in
-            LandmarkList()
-                .previewDevice(PreviewDevice(rawValue: deviceName))
+        LandmarkList()
+            .environmentObject(ModelData())
+    }
+}
+```
+
+`EnvironmentObjec` is a property wrapper type for an observable object supplied by a parent or ancestor view.
+
+An environment object invalidates the current view whenever the observable object changes. If you declare a property as an environment object, be sure to set a corresponding model object on an ancestor view by calling its `View.environmentObject(_:)` modifier.
+
+`View.environmentObject(_:)` supplies an `ObservableObject` to a view subhierachy.
+
+Update all the views to use `ModelData` object to provide the data of the landmarks.
+
+Update the `ContentView` preview to add the model object to the environment, **which makes the object available to any subview**.
+
+A preview fails if any subview requires a model object in the environment, but the view you are previewing doesn’t have the `environmentObject(_:)` modifier.
+
+```swift
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+            // ContentView, which has LandmarksList view, requires a Model
+            // data as a EnvironmentObject
+            .environmentObject(ModelData())
+    }
+}
+```
+
+Next, you’ll update the app instance to put the model object in the environment when you run the app in the simulator or on a device.
+
+Same in Application class.
+
+Update the `LandmarksApp` to create a model instance and supply it to `ContentView` using the `environmentObject(_:)` modifier.
+
+Use the `@StatObject` attribute to initialize a model object for a given property only once during the life time of the app. This is true when you use the attribute in an app instance, as shown here, as well as when you use it in a view.
+
+```swift
+@main
+struct LandmarksApp: App {
+    
+    @StateObject private var modelData = ModelData()
+    
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(modelData)
         }
     }
+
+}
+```
+
+`@StatObject` is a property wrapper type that instantiates an observable object.
+
+## Create a Favorite Button for Each Landmark
+
+The Landmarks app can now switch between a filtered and unfiltered view of the landmarks, but the list of favorite landmarks is still hard coded. To allow the user to add and remove favorites, you need to add a favorite button to the landmark detail view.
+
+![readme-images/Screen_Shot_2021-03-21_at_10.05.06_AM.png](readme-images/Screen_Shot_2021-03-21_at_10.05.06_AM.png)
+
+Create a `FavoriteButton.swift` SwiftUI file.
+
+Add an `isSet` binding that indicates the button’s current state, and provide a constant value for the preview.
+
+Because you use a binding, changes made inside this view propagate back to the data source.
+
+```swift
+import SwiftUI
+
+struct FavoriteButton: View {
+    @Binding var isSet: Bool
+
+    var body: some View {
+        Text("Hello, World!")
+    }
+}
+
+struct FavoriteButton_Previews: PreviewProvider {
+    static var previews: some View {
+        FavoriteButton(isSet: .constant(true))
+    }
+}
+```
+
+`@Binding` A property wrapper type that can read and write a value owned by a source of truth.
+
+Use a binding to create a two-way connection between a property that stores data, and a view that displays and changes the data. A binding connects a property to a source of truth stored elsewhere, instead of storing data directly.
+
+For example, a button that toggles between play and pause can create a binding to a property of its parent view using the `Binding` property wrapper.
+
+That means, that a parent view instantiate a single view and pass a `@State` value, and this child view can update this value by *binding* to a local variable marked with `@Binding`.
+
+Next, you’ll add the FavoriteButton to the detail view, binding the button’s isSet property to the isFavorite property of a given landmark.
+
+Switch to `LandmarkDetail.swift`, and compute the index of the input landmark by comparing it with the model data.
+
+To support this, you also need access to the environment’s model data.
+
+```swift
+struct LandmarkDetail: View {
+
+        @EnvironmentObject var modelData: ModelData
+    var landmark: Landmark
+
+    var landmarkIndex: Int {
+        modelData.landmarks.firstIndex(where: { $0.id == landmark.id })!
+    }
+
+        ...
+
+}
+```
+
+Embed the landmark’s name in an `HStack`with a new `FavoriteButton`; provide a binding to the `isFavorite` property with the dollar sign (`$`).
+
+Use `landmarkIndex` with the `modelData`object to ensure that the button updates the `isFavorite` property of the landmark stored in your model object. 
+
+This will allow to update the state of the object (`isFavorite` value in this case) in the whole application since the source of truth is the `EnvironmentObject` `modelData`.
+
+```swift
+HStack {
+
+        Text(currentLandmark.name)
+                .font(.title)
+                .foregroundColor(.primary)
+
+        FavoriteButton(isSet: $modelData.landmarks[landmarkIndex].isFavorite)
+
 }
 ```
