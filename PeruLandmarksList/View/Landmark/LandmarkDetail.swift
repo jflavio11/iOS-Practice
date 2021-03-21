@@ -9,7 +9,14 @@ import SwiftUI
 
 struct LandmarkDetail: View {
     
-    var landmark: Landmark
+    @EnvironmentObject var modelData: ModelData
+    var currentLandmark: Landmark
+    
+    var landmarkIndex: Int {
+        modelData.landmarks.firstIndex(where: {
+            $0.id == currentLandmark.id
+        })!
+    }
     
     var body: some View {
         
@@ -17,29 +24,33 @@ struct LandmarkDetail: View {
             
             VStack {
                 
-                MapView(coordinate: landmark.locationCordinates)
+                MapView(coordinate: currentLandmark.locationCordinates)
                     .ignoresSafeArea(edges: .top)
                     .frame(height: 300)
                 
-                CircleImage(image: landmark.image)
+                CircleImage(image: currentLandmark.image)
                     .offset(y: -115)
                     .padding(.bottom, -115)
                 
                 VStack(alignment: .leading) {
                     
-                    Text(landmark.name)
-                        .font(.title)
+                    HStack {
+                        Text(currentLandmark.name)
+                            .font(.title)
+                            .foregroundColor(.primary)
+                        FavoriteButton(isSet: $modelData.landmarks[landmarkIndex].isFavorite)
+                    }
                     
                     HStack {
-                        Text(landmark.park)
+                        Text(currentLandmark.park)
                         Spacer()
-                        Text(landmark.state)
+                        Text(currentLandmark.state)
                     }.font(.subheadline)
                     .foregroundColor(.gray)
                     
                     Divider()
                     
-                    Text(landmark.description)
+                    Text(currentLandmark.description)
                         .font(.body)
                     
                 }.padding()
@@ -47,7 +58,7 @@ struct LandmarkDetail: View {
             }
             
         }
-        .navigationTitle(landmark.name)
+        .navigationTitle(currentLandmark.name)
         .navigationBarTitleDisplayMode(.inline)
         
     }
@@ -55,6 +66,6 @@ struct LandmarkDetail: View {
 
 struct LandmarkDetail_Previews: PreviewProvider {
     static var previews: some View {
-        LandmarkDetail(landmark: ModelData().landmarks[0])
+        LandmarkDetail(currentLandmark: ModelData().landmarks[0])
     }
 }

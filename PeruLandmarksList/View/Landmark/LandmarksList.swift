@@ -30,7 +30,7 @@ struct LandmarksList: View {
                 
                 ForEach(filteredLandmarks) { landmark in
                     
-                    NavigationLink(destination: LandmarkDetail(landmark: landmark)) {
+                    NavigationLink(destination: LandmarkDetail(currentLandmark: landmark)) {
                         LandmarkRow(landmark: landmark)
                     }
                     
