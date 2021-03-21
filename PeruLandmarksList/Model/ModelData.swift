@@ -10,6 +10,8 @@ import Combine
 
 final class ModelData: ObservableObject {
     @Published var landmarks : [Landmark] = loadData(fileName: "landmarkData.json")
+    // @Published not needed since we need only read hikes data, we do not need to modify and observe those changes
+    var hikes: [Hike] = loadData(fileName: "hikeData.json")
 }
 
 func loadData<T: Decodable>(fileName: String) -> T {
