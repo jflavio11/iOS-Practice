@@ -17,5 +17,8 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            // ContentView, which has LandmarksList view, requires a Model
+            // data as a EnvironmentObject
+            .environmentObject(ModelData())
     }
 }
