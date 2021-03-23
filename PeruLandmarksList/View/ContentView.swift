@@ -9,7 +9,19 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        LandmarksList()
+        TabView {
+            Text("1")
+                .tabItem {
+                    Image(systemName: "star.fill")
+                    Text("1")
+                }
+            
+            LandmarksList()
+                .tabItem {
+                    Image(systemName: "leaf.arrow.circlepath")
+                    Text("Maravillas del Perú")
+                }
+        }
     }
     
 }
